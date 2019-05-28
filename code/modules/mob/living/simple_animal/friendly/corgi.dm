@@ -10,10 +10,11 @@
 	health = 30
 	maxHealth = 30
 	gender = MALE
-	speak = list("YAP", "Woof!", "Bark!", "AUUUUUU")
+	speak = list("YAP!", "Woof!", "Bark!", "Arf!")
 	speak_emote = list("barks", "woofs")
-	emote_hear = list("barks", "woofs", "yaps","pants")
-	emote_see = list("shakes its head", "shivers")
+	emote_hear = list("barks", "woofs", "yaps")
+	emote_see = list("shakes its head", "shivers", "pants")
+	emote_sound = list("sound/voice/corgibark.ogg")
 	speak_chance = 1
 	turns_per_move = 10
 
@@ -116,7 +117,7 @@
 		if(!stat)
 			user.visible_message("<span class='notice'>[user] baps [name] on the nose with the rolled up [O]</span>")
 			spawn(0)
-				emote("whines")
+				emote("me", 1, "whines")
 				for(var/i in list(1,2,4,8,4,2,1,2))
 					dir = i
 					sleep(1)
@@ -132,7 +133,7 @@
 				for (var/mob/M in viewers(src, null))
 					M.show_message("<span class='warning'>[user] gently taps [src] with [O]. </span>")
 			if(health>0 && prob(15))
-				emote("looks at [user] with [pick("an amused","an annoyed","a confused","a resentful", "a happy", "an excited")] expression")
+				emote("me", 1, "looks at [user] with [pick("an amused","an annoyed","a confused","a resentful", "a happy", "an excited")] expression")
 			return
 	else
 		var/obj/item/clothing/mask/facehugger/F = O
@@ -238,7 +239,7 @@
 	//Various hats and items (worn on his head) change Ian's behaviour. His attributes are reset when a hat is removed.
 	switch(item_to_add.type)
 		if( /obj/item/clothing/glasses/sunglasses, /obj/item/clothing/head/that, /obj/item/clothing/head/collectable/paper,
-				/obj/item/clothing/head/hardhat, /obj/item/clothing/head/collectable/hardhat,/obj/item/clothing/head/hardhat/white, /obj/item/weapon/paper )
+				/obj/item/clothing/head/hardhat, /obj/item/clothing/head/collectable/hardhat,/obj/item/clothing/head/hardhat/white, /obj/item/weapon/p_folded/hat )
 			valid = 1
 
 		if(/obj/item/clothing/head/helmet/tactical/sec,/obj/item/clothing/head/helmet/tactical/sec/preattached)
@@ -423,7 +424,7 @@
     if(!stat && !resting && !locked_to)
         if(prob(1))
             if (ckey == null)
-                emote(pick(emotes))
+                emote("me", 1, pick(emotes))
                 spawn(0)
                     for(var/i in list(1,2,4,8,4,2,1,2,4,8,4,2,1,2,4,8,4,2))
                         dir = i
@@ -435,10 +436,11 @@
 			if(inventory_head)
 				name = real_name
 				desc = initial(desc)
-				speak = list("YAP", "Woof!", "Bark!", "AUUUUUU")
+				speak = list("YAP!", "Woof!", "Bark!", "Arf!")
 				speak_emote = list("barks", "woofs")
-				emote_hear = list("barks", "woofs", "yaps","pants")
-				emote_see = list("shakes its head", "shivers")
+				emote_hear = list("barks", "woofs", "yaps")
+				emote_see = list("shakes its head", "shivers", "pants")
+				emote_sound = list("sound/voice/corgibark.ogg")
 				min_oxy = initial(min_oxy)
 				minbodytemp = initial(minbodytemp)
 				maxbodytemp = initial(maxbodytemp)
@@ -472,6 +474,7 @@
 	response_disarm = "bops"
 	response_harm   = "kicks"
 	spin_emotes = list("dances around","chases his tail")
+	is_pet = TRUE
 
 /mob/living/simple_animal/corgi/Ian/santa
 	name = "Santa's Corgi Helper"
@@ -531,7 +534,7 @@
 							movement_target.attack_animal(src)
 						else if(ishuman(movement_target.loc) )
 							if(prob(20))
-								emote("stares at [movement_target.loc]'s [movement_target] with a sad puppy-face")
+								emote("me", 1, "stares at [movement_target.loc]'s [movement_target] with a sad puppy-face")
 //PC stuff-Sieve
 
 /mob/living/simple_animal/corgi/regenerate_icons()
@@ -596,7 +599,7 @@
 	response_harm   = "kicks"
 	var/turns_since_scan = 0
 	var/puppies = 0
-	spin_emotes = list("dances around","chases her of a tail")
+	spin_emotes = list("dances around","chases her tail")
 
 //Lisa already has a cute bow!
 /mob/living/simple_animal/corgi/Lisa/Topic(href, href_list)
@@ -607,23 +610,21 @@
 
 /mob/living/simple_animal/corgi/attack_hand(mob/living/carbon/human/M)
 	. = ..()
-	switch(M.a_intent)
-		if(I_HELP)
-			wuv(1,M)
-		if(I_HURT)
-			wuv(-1,M)
+	react_to_touch(M)
+	M.delayNextAttack(2 SECONDS)
 
-/mob/living/simple_animal/corgi/proc/wuv(change, mob/M)
-	if(change)
-		if(change > 0)
-			if(M && !isUnconscious()) // Added check to see if this mob (the corgi) is dead to fix issue 2454
+/mob/living/simple_animal/corgi/proc/react_to_touch(mob/M)
+	if(M && !isUnconscious())
+		switch(M.a_intent)
+			if(I_HELP)
 				var/image/heart = image('icons/mob/animal.dmi',src,"heart-ani2")
 				heart.plane = ABOVE_HUMAN_PLANE
 				flick_overlay(heart, list(M.client), 20)
-				emote("yaps happily")
-		else
-			if(M && !isUnconscious()) // Same check here, even though emote checks it as well (poor form to check it only in the help case)
-				emote("growls")
+				emote("me", EMOTE_AUDIBLE, "yaps happily.")
+				playsound(loc, 'sound/voice/corgibark.ogg', 80, 1)
+			if(I_HURT)
+				playsound(loc, 'sound/voice/corgigrowl.ogg', 80, 1)
+				emote("me", EMOTE_AUDIBLE, "growls.")
 
 
 //Sasha isn't even a corgi you dummy!
@@ -636,6 +637,7 @@
 	icon_living = "doby"
 	icon_dead = "doby_dead"
 	spin_emotes = list("prances around","chases her nub of a tail")
+	is_pet = TRUE
 
 	species_type = /mob/living/simple_animal/corgi/sasha
 	meat_type = /obj/item/weapon/reagent_containers/food/snacks/meat/animal
@@ -703,7 +705,7 @@
 	..()
 
 	if(!incapacitated() && !resting && !locked_to && !client)
-		var/list/can_see() = view(src, 6) //Might need tweaking.
+		var/list/can_see = view(src, 6) //Might need tweaking.
 		if(victim && (!IsVictim(victim) || !(victim.loc in can_see)))
 			victim = null
 			stop_automated_movement = FALSE

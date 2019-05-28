@@ -1,3 +1,44 @@
+//Glasses
+/obj/item/clothing/glasses
+	name = "glasses"
+	icon = 'icons/obj/clothing/glasses.dmi'
+	w_class = W_CLASS_SMALL
+	body_parts_covered = EYES
+	slot_flags = SLOT_EYES
+	var/vision_flags = 0
+	var/darkness_view = 0//Base human is 2
+	var/invisa_view = 0
+	var/cover_hair = 0
+	var/see_invisible = 0
+	var/see_in_dark = 0
+	var/prescription = 0
+	min_harm_label = 12
+	harm_label_examine = list("<span class='info'>A label is covering one lens, but doesn't reach the other.</span>","<span class='warning'>A label covers the lenses!</span>")
+	species_restricted = list("exclude","Muton")
+/*
+SEE_SELF  // can see self, no matter what
+SEE_MOBS  // can see all mobs, no matter what
+SEE_OBJS  // can see all objs, no matter what
+SEE_TURFS // can see all turfs (and areas), no matter what
+SEE_PIXELS// if an object is located on an unlit area, but some of its pixels are
+          // in a lit area (via pixel_x,y or smooth movement), can see those pixels
+BLIND     // can't see anything
+*/
+/obj/item/clothing/glasses/harm_label_update()
+	if(harm_labeled >= min_harm_label)
+		vision_flags |= BLIND
+	else
+		vision_flags &= ~BLIND
+
+/obj/item/clothing/glasses/equipped(mob/M, var/slot)
+	..()
+	if(slot == slot_glasses)
+		M.handle_regular_hud_updates()
+
+/obj/item/clothing/glasses/unequipped(mob/M, var/from_slot = null)
+	..()
+	if(from_slot == slot_glasses)
+		M.handle_regular_hud_updates()
 
 /obj/item/clothing/glasses/scanner/meson/prescription
 	name = "prescription mesons"
@@ -217,10 +258,10 @@
 	var/obj/item/clothing/glasses/hud/security/hud = null
 	species_fit = list(VOX_SHAPED, GREY_SHAPED)
 
-	New()
-		..()
-		src.hud = new/obj/item/clothing/glasses/hud/security(src)
-		return
+/obj/item/clothing/glasses/sunglasses/sechud/New()
+	..()
+	src.hud = new/obj/item/clothing/glasses/hud/security(src)
+	return
 
 /obj/item/clothing/glasses/sunglasses/sechud/become_defective()
 	if(!defective)
@@ -322,7 +363,7 @@
 	desc = "Used for seeing walls, floors, and stuff through anything."
 	icon_state = "meson"
 	origin_tech = Tc_MAGNETS + "=3;" + Tc_SYNDICATE + "=4"
-	species_fit = list(VOX_SHAPED)
+	species_fit = list(VOX_SHAPED, GREY_SHAPED)
 
 /obj/item/clothing/glasses/thermal/monocle
 	name = "Thermonocle"

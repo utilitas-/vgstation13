@@ -37,7 +37,7 @@
 	desc = "You could build a fort with this."
 	icon_state = "largebox"
 	item_state = "largebox"
-	w_class = W_CLASS_GIANT // Big, bulky.
+	w_class = W_CLASS_LARGE // Big, bulky.
 	foldable = /obj/item/stack/sheet/cardboard
 	foldable_amount = 4 // Takes 4 to make. - N3X
 	starting_materials = list(MAT_CARDBOARD = 15000)
@@ -107,9 +107,37 @@
 	new /obj/item/weapon/tank/emergency_oxygen/double(src)
 	new /obj/item/stack/medical/bruise_pack/bandaid(src)
 
+/obj/item/weapon/storage/box/priority_care
+	name = "priority care parcel"
+	desc = "A small parcel of miscellaneous junk Nanotrasen hands out to their most requested employees."
+	icon_state = "nt"
+
+/obj/item/weapon/storage/box/priority_care/New()
+	..()
+	new /obj/item/weapon/spacecash/c100(src)
+	new /obj/item/weapon/reagent_containers/food/snacks/donkpocket/self_heating(src)
+	for(var/i in 1 to 3)
+		var/toSpawn = pick(
+			/obj/item/voucher/free_item/donk,
+			/obj/item/voucher/free_item/hot_drink,
+			/obj/item/voucher/free_item/glowing,
+			/obj/item/voucher/free_item/snack,
+			/obj/item/mounted/poster,
+			/obj/item/weapon/pen/NT,
+			/obj/item/clothing/accessory/medal/participation,
+			/obj/item/weapon/reagent_containers/food/drinks/americup,
+			/obj/item/weapon/lighter/NT,
+			25;/obj/item/toy/syndicateballoon/ntballoon,
+			25;/obj/item/weapon/reagent_containers/food/snacks/chococoin,
+			25;/obj/item/weapon/tank/emergency_oxygen/engi,
+			25;/obj/item/weapon/reagent_containers/hypospray/autoinjector,
+			25;/obj/item/weapon/reagent_containers/food/drinks/thermos/full
+		)
+		new toSpawn(src)
+
 /obj/item/weapon/storage/box/gloves
 	name = "box of latex gloves"
-	desc = "A box containing white latex gloves. gloves."
+	desc = "A box containing white latex gloves. gloves. gloves."
 	icon_state = "latex"
 
 /obj/item/weapon/storage/box/gloves/New()
@@ -375,7 +403,7 @@
 /obj/item/weapon/storage/box/monkeycubes/New()
 	..()
 	if(src.type == /obj/item/weapon/storage/box/monkeycubes)
-		for(var/i = 1; i <= 5; i++)
+		for(var/i = 1; i <= 6; i++)
 			new /obj/item/weapon/reagent_containers/food/snacks/monkeycube/wrapped(src)
 
 /obj/item/weapon/storage/box/monkeycubes/farwacubes
@@ -566,6 +594,15 @@
 	..()
 	new /obj/item/clothing/suit/syndicatefake(src)
 	new /obj/item/clothing/head/syndicatefake(src)
+	
+/obj/item/weapon/storage/box/syndicatefake/ninja
+	name = "Ninja Suit and Hood Replica"
+	icon_state = "box_of_doom"
+
+/obj/item/weapon/storage/box/syndicatefake/ninja/New()
+	..()
+	new /obj/item/clothing/suit/spaceninjafake(src)
+	new /obj/item/clothing/head/spaceninjafake(src)
 
 /obj/item/weapon/storage/box/autoinjectors
 	name = "box of injectors"
@@ -819,3 +856,19 @@
 							/obj/item/toy/prize/odysseus,
 							/obj/item/toy/prize/phazon)
 		new randomFigurine(src)
+
+/obj/item/weapon/storage/box/diy_soda
+	name = "Dr. Pecker's DIY soda kit"
+	desc = "A trendy and expensive 'DIY' soda that you have to mix yourself. Tastes like a science fair experiment."
+	icon_state = "box_DIY_soda"
+	vending_cat = "carbonated drinks"
+
+/obj/item/weapon/storage/box/diy_soda/New()
+	..()
+	new /obj/item/weapon/reagent_containers/glass/beaker/vial/tenwater(src)
+	new /obj/item/weapon/reagent_containers/glass/beaker/vial/tencarbon(src)
+	new /obj/item/weapon/reagent_containers/glass/beaker/vial/tenantitox(src)
+	new /obj/item/weapon/reagent_containers/glass/beaker/erlenmeyer/lemonlime(src)
+	new /obj/item/weapon/reagent_containers/glass/beaker/erlenmeyer/sodawater(src)
+	new /obj/item/weapon/reagent_containers/glass/beaker/large/erlenmeyer(src)
+	new /obj/item/weapon/paper/diy_soda(src)

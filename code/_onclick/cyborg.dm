@@ -19,6 +19,9 @@
 		return
 
 	var/list/modifiers = params2list(params)
+	if(modifiers["middle"] && modifiers["shift"])
+		MiddleShiftClickOn(A)
+		return
 	if(modifiers["middle"])
 		MiddleClickOn(A)
 		return
@@ -141,20 +144,6 @@
 		return
 	A.RobotAltClick(src)
 	return
-
-/mob/living/silicon/robot/ShiftClickOn(var/atom/A)
-	//Borgs can into doors as well
-	if(istype(A, /obj/machinery/door/airlock))
-		A.AIShiftClick(src)
-		return
-	..()
-
-/mob/living/silicon/robot/CtrlClickOn(var/atom/A)
-	//Borgs can into doors as well
-	if(istype(A, /obj/machinery/door/airlock))
-		A.AICtrlClick(src)
-		return
-	..()
 
 /*
 	As with AI, these are not used in click code,

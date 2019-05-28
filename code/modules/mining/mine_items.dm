@@ -252,7 +252,7 @@ proc/move_mining_shuttle()
 	desc = "This makes no metallurgic sense."
 
 /obj/item/weapon/pickaxe/plasmacutter
-	name = "plasma cutter"
+	name = "plasma torch"
 	icon_state = "plasmacutter"
 	item_state = "gun"
 	w_class = W_CLASS_MEDIUM //it is smaller than the pickaxe
@@ -263,10 +263,59 @@ proc/move_mining_shuttle()
 	sharpness = 1.0
 	sharpness_flags = SHARP_BLADE | HOT_EDGE | INSULATED_EDGE
 	origin_tech = Tc_MATERIALS + "=4;" + Tc_PLASMATECH + "=3;" + Tc_ENGINEERING + "=3"
-	desc = "A rock cutter that uses bursts of hot plasma. You could use it to cut limbs off of xenos! Or, you know, mine stuff."
+	desc = "A rock cutter that uses bursts of hot plasma"
 	diggables = DIG_ROCKS | DIG_WALLS
 	drill_verb = "cutting"
 	drill_sound = 'sound/items/Welder.ogg'
+
+/obj/item/weapon/pickaxe/plasmacutter/accelerator
+	name = "plasma cutter"
+	desc = "A rock cutter that fires bolts of hot plasma. You could use it to cut limbs off of xenos! Or, you know, mine stuff."
+	digspeed = 5
+	diggables = DIG_ROCKS | DIG_SOIL | DIG_WALLS | DIG_RWALLS
+	var/max_ammo = 15
+	var/current_ammo = 15
+
+/obj/item/weapon/pickaxe/plasmacutter/accelerator/afterattack(var/atom/A, var/mob/living/user, var/proximity_flag, var/click_parameters)
+	if(proximity_flag)
+		return
+	if(user.is_pacified(VIOLENCE_SILENT,A,src))
+		return
+	if(current_ammo >0)
+		current_ammo--
+		var/turf/starting = get_turf(user)
+		var/turf/target = get_turf(A)
+		var/obj/item/projectile/kinetic/cutter/BS = new (starting)
+		BS.firer = user
+		BS.original = target
+		BS.target = target
+		BS.current = starting
+		BS.starting = starting
+		BS.yo = target.y - starting.y
+		BS.xo = target.x - starting.x
+		user.delayNextAttack(4)
+		if(user.zone_sel)
+			BS.def_zone = user.zone_sel.selecting
+		else
+			BS.def_zone = LIMB_CHEST
+		BS.OnFired()
+		playsound(starting, 'sound/weapons/Taser.ogg', 50, 1)
+		BS.process()
+	else
+		src.visible_message("*click click*")
+		playsound(src, 'sound/weapons/empty.ogg', 100, 1)
+
+/obj/item/weapon/pickaxe/plasmacutter/accelerator/attackby(atom/target, mob/user, proximity_flag)
+	if(proximity_flag && istype(target, /obj/item/stack/sheet))
+		var/obj/item/stack/sheet/A = target
+		if(A.mat_type == MAT_PLASMA)
+			if(current_ammo < max_ammo)
+				var/loading_ammo = max_ammo - current_ammo
+				A.amount -= loading_ammo
+				current_ammo += loading_ammo
+				to_chat(user, "<span class='notice'>You load [src].</span>")
+			else
+				to_chat(user, "<span class='notice'>[src] is already loaded.</span>")
 
 /obj/item/weapon/pickaxe/diamond
 	name = "diamond pickaxe"
@@ -422,6 +471,7 @@ proc/move_mining_shuttle()
 	if(isliving(M))
 		var/mob/living/L = M
 		L.Knockdown(3)
+		L.Stun(3)
 		if(ishuman(L))
 			shake_camera(L, 20, 1)
 			spawn(20)
@@ -569,12 +619,12 @@ proc/move_mining_shuttle()
 	ranged_cooldown_cap = 3
 	projectiletype = /obj/item/projectile/beam
 	projectilesound = 'sound/weapons/Laser.ogg'
-	wanted_objects = list(/obj/item/weapon/ore)
+	wanted_objects = list(/obj/item/stack/ore)
 	meat_type = null
 	mob_property_flags = MOB_ROBOTIC
 
 /mob/living/simple_animal/hostile/mining_drone/attackby(obj/item/I as obj, mob/user as mob)
-	if(istype(I, /obj/item/weapon/weldingtool))
+	if(iswelder(I))
 		var/obj/item/weapon/weldingtool/W = I
 		if(W.welding && !stat)
 			if(stance != HOSTILE_STANCE_IDLE)
@@ -591,6 +641,20 @@ proc/move_mining_shuttle()
 		to_chat(user, "<span class='notice'>You instruct \the [src] to drop any collected ore.</span>")
 		DropOre()
 		return
+	if(!client && istype(I, /obj/item/device/paicard))
+		var/obj/item/device/paicard/P = I
+		if(!P.pai)
+			to_chat(user, "<span class = 'warning'>\The [P] has no intelligence within it.</span>")
+			return
+		var/response = alert(user, "Are you sure you want to put \the [P] into \the [src]? This can not be undone.","Insert \the [P]?","Yes","No")
+		if(response != "Yes")
+			return
+		if(do_after(user, src, 30))
+			user.drop_item(P, force_drop = TRUE)
+			P.pai.mind.transfer_to(src)
+			projectiletype = /obj/item/projectile/kinetic
+			qdel(P)
+
 	..()
 
 /mob/living/simple_animal/hostile/mining_drone/death(var/gibbed = FALSE)
@@ -646,13 +710,13 @@ proc/move_mining_shuttle()
 		to_chat(src, "<span class='info' style=\"font-family:Courier\">Combat mode active.</span>")
 
 /mob/living/simple_animal/hostile/mining_drone/AttackingTarget()
-	if(istype(target, /obj/item/weapon/ore))
+	if(istype(target, /obj/item/stack/ore))
 		CollectOre()
 		return
 	..()
 
 /mob/living/simple_animal/hostile/mining_drone/proc/CollectOre()
-	var/obj/item/weapon/ore/O
+	var/obj/item/stack/ore/O
 	for(O in src.loc)
 		O.forceMove(src)
 	for(var/dir in alldirs)
@@ -664,7 +728,7 @@ proc/move_mining_shuttle()
 /mob/living/simple_animal/hostile/mining_drone/proc/DropOre()
 	if(!contents.len)
 		return
-	for(var/obj/item/weapon/ore/O in contents)
+	for(var/obj/item/stack/ore/O in contents)
 		contents -= O
 		O.forceMove(src.loc)
 	if(client)
@@ -692,7 +756,7 @@ proc/move_mining_shuttle()
 
 /mob/living/simple_animal/hostile/mining_drone/UnarmedAttack(atom/A)
 	. = ..()
-	if(client && search_objects == 2 && (istype(A, /obj/item/weapon/ore) || isturf(A)) && !attack_delayer.blocked())
+	if(client && search_objects == 2 && (istype(A, /obj/item/stack/ore) || isturf(A)) && !attack_delayer.blocked())
 		delayNextAttack(8)
 		CollectOre()
 
@@ -914,7 +978,7 @@ proc/move_mining_shuttle()
 		var/list/L = list()
 		var/turf/unsimulated/mineral/M
 		for(M in range(7, user))
-			if(M.scan_state)
+			if(M.GetScanState())
 				L += M
 		if(!L.len)
 			to_chat(user, "<span class='notice'>\The [src] reports that nothing was detected nearby.</span>")
@@ -922,7 +986,7 @@ proc/move_mining_shuttle()
 		else
 			for(M in L)
 				var/turf/T = get_turf(M)
-				var/image/I = image('icons/turf/walls.dmi', loc = T, icon_state = M.scan_state, layer = UNDER_HUD_LAYER)
+				var/image/I = image('icons/turf/mine_overlays.dmi', loc = T, icon_state = M.GetScanState(), layer = UNDER_HUD_LAYER)
 				I.plane = HUD_PLANE
 				C.images += I
 				spawn(30)

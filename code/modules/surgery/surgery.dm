@@ -105,7 +105,7 @@ proc/do_surgery(mob/living/M, mob/living/user, obj/item/tool)
 	var/clumsy = 0
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
-		clumsy = ((M_CLUMSY in H.mutations) && prob(50))
+		clumsy = (tool.clumsy_check(H) && prob(50))
 
 	var/target_area = user.zone_sel ? user.zone_sel.selecting : get_random_zone_sel()
 
@@ -135,7 +135,7 @@ proc/do_surgery(mob/living/M, mob/living/user, obj/item/tool)
 				else
 					if(sleep_fail)
 						to_chat(user, "<span class='warning'>The patient is squirming around in pain!</span>")
-						M.emote("scream",,, 1)
+						M.audible_scream()
 					M.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has had surgery [S.type] with \the [tool] failed by [user.name] ([user.ckey])</font>")
 					user.attack_log += text("\[[time_stamp()]\] <font color='red'>Failed surgery [S.type] with \the [tool] on [M.name] ([M.ckey])</font>")
 					log_attack("<font color='red'>[user.name] ([user.ckey]) used \the [tool] to fail the surgery type [S.type] on [M.name] ([M.ckey])</font>")

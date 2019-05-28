@@ -45,8 +45,14 @@
 	var/next_dest
 	var/next_dest_loc
 
+	var/coolingdown = FALSE
+	var/attack_cooldown = 30 // set this to 0 to unleash the horror
+
+	can_take_pai = TRUE
+
 /obj/machinery/bot/cleanbot/New()
 	..()
+	cleanbot_list.Add(src)
 	src.get_targets()
 	src.icon_state = "[src.icon_initial][src.on]"
 
@@ -60,6 +66,10 @@
 
 	if(radio_controller)
 		radio_controller.add_object(src, beacon_freq, filter = RADIO_NAVBEACONS)
+
+/obj/machinery/bot/cleanbot/Destroy()
+	cleanbot_list.Remove(src)
+	..()
 
 
 /obj/machinery/bot/cleanbot/turn_on()
@@ -146,18 +156,19 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 			to_chat(usr, "<span class='notice'>You press the weird button.</span>")
 			src.updateUsrDialog()
 
-/obj/machinery/bot/cleanbot/attackby(obj/item/weapon/W, mob/user as mob)
+/obj/machinery/bot/cleanbot/attackby(obj/item/weapon/W, mob/user)
 	if (istype(W, /obj/item/weapon/card/id)||istype(W, /obj/item/device/pda))
-		if(src.allowed(usr) && !open && !emagged)
-			src.locked = !src.locked
-			to_chat(user, "<span class='notice'>You [ src.locked ? "lock" : "unlock"] the [src] behaviour controls.</span>")
+		if(allowed(usr) && !open && !emagged)
+			locked = !locked
+			to_chat(user, "<span class='notice'>You [locked ? "lock" : "unlock"] [src]'s behaviour controls.</span>")
+			updateUsrDialog()
 		else
 			if(emagged)
 				to_chat(user, "<span class='warning'>ERROR</span>")
-			if(open)
+			else if(open)
 				to_chat(user, "<span class='warning'>Please close the access panel before locking it.</span>")
 			else
-				to_chat(user, "<span class='notice'>This [src] doesn't seem to respect your authority.</span>")
+				to_chat(user, "<span class='notice'>[src] doesn't seem to respect your authority.</span>")
 	else
 		return ..()
 
@@ -171,7 +182,8 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 
 /obj/machinery/bot/cleanbot/process()
 	//set background = 1
-
+	if(integratedpai)
+		return
 	if(!src.on)
 		return
 	if(src.cleaning)
@@ -232,6 +244,7 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 				if (next_dest_loc)
 					src.patrol_path = AStar(src.loc, next_dest_loc, /turf/proc/CardinalTurfsWithAccess, /turf/proc/Distance, 0, 120, id=botcard, exclude=null)
 		else
+			set_glide_size(DELAY2GLIDESIZE(SS_WAIT_MACHINERY))
 			patrol_move()
 
 		return
@@ -250,11 +263,12 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 				target.targetted_by = null
 				src.target = null
 		return
-	if(src.path.len > 0 && src.target && (src.target != null))
-		step_to(src, src.path[1])
-		src.path -= src.path[1]
-	else if(src.path.len == 1)
-		step_to(src, target)
+	if(isturf(loc))
+		if(src.path.len > 0 && src.target && (src.target != null))
+			step_to(src, src.path[1])
+			src.path -= src.path[1]
+		else if(src.path.len == 1)
+			step_to(src, target)
 
 	if(src.target && (src.target != null))
 		patrol_path = null
@@ -267,6 +281,8 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 	src.oldloc = src.loc
 
 /obj/machinery/bot/cleanbot/proc/patrol_move()
+	if(!isturf(loc))
+		return
 	if (src.patrol_path.len <= 0)
 		return
 
@@ -337,6 +353,7 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 		new /obj/item/robot_parts/l_arm(Tsec)
 
 	spark(src)
+	eject_integratedpai_if_present()
 	qdel(src)
 	return
 
@@ -348,26 +365,34 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 	var/armed = 0
 
 /obj/machinery/bot/cleanbot/roomba/attackby(var/obj/item/W, mob/user)
-	..()
-	if(istype(W,/obj/item/weapon/kitchen/utensil/fork) && !armed)
+	if(istype(W,/obj/item/weapon/kitchen/utensil/fork) && !armed && user.a_intent != I_HURT)
 		if(user.drop_item(W))
 			qdel(W)
 			to_chat(user, "<span class='notice'>You attach \the [W] to \the [src]. It looks increasingly concerned about its current situation.</span>")
 			armed++
-	else if(istype(W, /obj/item/weapon/lighter) && armed == 1)
+	else if(istype(W, /obj/item/weapon/lighter) && armed == 1 && user.a_intent != I_HURT)
 		if(user.drop_item(W))
 			qdel(W)
 			to_chat(user, "<span class='notice'>You attach \the [W] to \the [src]. It appears to roll its sensor in disappointment before carrying on with its work.</span>")
 			armed++
 			icon_state = "roombot_battle[on]"
 			icon_initial = "roombot_battle"
+	else
+		. = ..()
 
 /obj/machinery/bot/cleanbot/roomba/Crossed(atom/A)
+	if(coolingdown)
+		return
 	if(isliving(A))
 		var/mob/living/L = A
-		if(prob(30))
+		if(prob(10))
 			annoy(L)
-	..()
+		..()
+
+/obj/machinery/bot/cleanbot/proc/attack_cooldown()
+	coolingdown = TRUE
+	spawn(attack_cooldown)
+		coolingdown = FALSE
 
 /obj/machinery/bot/cleanbot/roomba/proc/annoy(var/mob/living/L)
 	switch(armed)
@@ -380,6 +405,7 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 			var/damage = rand(3,12)
 			L.adjustBruteLoss(damage)
 			L.adjustFireLoss(damage/2)
+	attack_cooldown()
 
 /obj/item/weapon/bucket_sensor/attackby(var/obj/item/W, mob/user as mob)
 	..()
@@ -412,3 +438,65 @@ text("<A href='?src=\ref[src];operation=oddbutton'>[src.oddbutton ? "Yes" : "No"
 		if (!in_range(src, usr) && src.loc != usr)
 			return
 		src.created_name = t
+
+/*
+ *	pAI SHIT, it uses the pAI framework in objs.dm. Check that code for further information
+*/
+
+/obj/machinery/bot/cleanbot/getpAIMovementDelay()
+	return 1
+
+/obj/machinery/bot/cleanbot/pAImove(mob/living/silicon/pai/user, dir)
+	if(!on)
+		return
+	if(!..())
+		return
+	if(!isturf(loc))
+		return
+	step(src, dir)
+
+/obj/machinery/bot/cleanbot/on_integrated_pai_click(mob/living/silicon/pai/user, atom/target)
+	if(!Adjacent(target))
+		return
+	if(istype(target,/obj/effect/decal/cleanable))
+		user.simple_message("<span class='notice'>You scrub \the [target.name] out.</span>",
+			"<span class='warning'>You destroy [pick("an artwork","a valuable artwork","a rare piece of art","a rare piece of modern art")].</span>")
+		returnToPool(target)
+
+	else if(istype(target,/turf/simulated))
+		var/turf/simulated/T = target
+		var/list/cleanables = list()
+
+		for(var/obj/effect/decal/cleanable/CC in T)
+			if(!istype(CC) || !CC)
+				continue
+			cleanables += CC
+
+		for(var/obj/effect/decal/cleanable/CC in get_turf(user)) //Get all nearby decals drawn on this wall and erase them
+			if(CC.on_wall == target)
+				cleanables += CC
+
+		if(!cleanables.len)
+			user.simple_message("<span class='notice'>You fail to clean anything.</span>",
+				"<span class='notice'>There is nothing for you to vandalize.</span>")
+			return
+		cleanables = shuffle(cleanables)
+		var/obj/effect/decal/cleanable/C
+		for(var/obj/effect/decal/cleanable/d in cleanables)
+			if(d && istype(d))
+				C = d
+				break
+		user.simple_message("<span class='notice'>You scrub \the [C.name] out.</span>",
+			"<span class='warning'>You destroy [pick("an artwork","a valuable artwork","a rare piece of art","a rare piece of modern art")].</span>")
+		returnToPool(C)
+	else
+		user.simple_message("<span class='notice'>You clean \the [target.name].</span>",
+			"<span class='warning'>You [pick("deface","ruin","stain")] \the [target.name].</span>")
+		target.clean_blood()
+	return
+
+/obj/machinery/bot/cleanbot/state_controls_pai(obj/item/device/paicard/P)
+	if(..())
+		to_chat(P.pai, "<span class='info'><b>Welcome to your new body. Remember: you're a pAI inside a cleanbot, so get cleaning.</b></span>")
+		to_chat(P.pai, "<span class='info'>- Click on something: Scrub it clean.</span>")
+		to_chat(P.pai, "<span class='info'>If you want to exit the cleanbot, somebody has to right-click you and press 'Remove pAI'.</span>")

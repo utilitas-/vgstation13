@@ -22,6 +22,8 @@
 	var/list/alarm_types_show = list("Motion" = 0, "Fire" = 0, "Atmosphere" = 0, "Power" = 0, "Camera" = 0)
 	var/list/alarm_types_clear = list("Motion" = 0, "Fire" = 0, "Atmosphere" = 0, "Power" = 0, "Camera" = 0)
 
+	var/datum/state_laws_ui/state_laws_ui = new() //holds the UI state for the State Laws verb. See: state_laws.dm
+
 /mob/living/silicon/hasFullAccess()
 	return 1
 
@@ -122,7 +124,13 @@
 	return 1
 
 /mob/living/silicon/generate_static_overlay()
-	return
+	if(!istype(static_overlays,/list))
+		static_overlays = list()
+	static_overlays.Add(list("cult"))
+
+	var/image/static_overlay = image(icon = 'icons/mob/animal.dmi', loc = src, icon_state = pick("faithless","forgotten","otherthing",))
+	static_overlay.override = 1
+	static_overlays["cult"] = static_overlay
 
 /mob/living/silicon/emp_act(severity)
 	for(var/obj/item/stickybomb/B in src)
@@ -223,7 +231,10 @@
 		show_station_time()
 		show_emergency_shuttle_eta()
 		show_system_integrity()
-		show_malf_ai()
+		for(var/datum/faction/F in ticker.mode.factions)
+			var/F_stat = F.get_statpanel_addition()
+			if(F_stat)
+				stat(null, "[F_stat]")
 
 // this function displays the stations manifest in a separate window
 /mob/living/silicon/proc/show_station_manifest()
@@ -346,3 +357,16 @@
 
 /mob/living/silicon/get_survive_objective()
 	return new /datum/objective/siliconsurvive
+
+/mob/living/silicon/Topic(href, href_list)
+	. = ..()
+	if(usr && (src != usr))
+		return
+	if(href_list["ui_key"] == "state_laws")
+		return state_laws_Topic(href, href_list) //state_laws.dm
+
+/mob/living/silicon/ui_interact(mob/user, ui_key, datum/nanoui/ui = null, force_open = 1)
+	if(..())
+		return
+	if(ui_key == "state_laws")
+		return state_laws_ui_interact(user, ui_key, ui, force_open) //state_laws.dm

@@ -76,7 +76,6 @@ var/list/shop_prices = list( //Cost in space credits
 /obj/item/device/assembly_frame = 50,
 
 /obj/item/device/camera = 30,
-/obj/item/device/camera/big_photos = 300,
 
 /obj/item/device/flash = 20,
 /obj/item/device/flash/synthetic = 1,
@@ -110,8 +109,8 @@ var/list/shop_prices = list( //Cost in space credits
 /obj/item/clothing/accessory/medal/gold/captain = 1500,
 /obj/item/device/radio/headset/headset_earmuffs = 125,
 /obj/item/device/detective_scanner = 200,
-/obj/item/device/mass_spectrometer/adv = 150,
-/obj/item/device/mass_spectrometer = 100,
+/obj/item/device/reagent_scanner/adv = 150,
+/obj/item/device/reagent_scanner = 100,
 /obj/item/device/mining_scanner = 15,
 /obj/item/device/mobcapsule = 200,
 /obj/item/weapon/solder = 10,
@@ -193,7 +192,7 @@ var/list/shop_prices = list( //Cost in space credits
 
 var/list/circuitboards = existing_typesof(/obj/item/weapon/circuitboard) - /obj/item/weapon/circuitboard/card/centcom //All circuit boards can be bought in Spessmart
 var/list/circuitboard_prices = list()	//gets filled on initialize()
-var/list/clothing = existing_typesof(/obj/item/clothing) - typesof(/obj/item/clothing/suit/space/ert) - typesof(/obj/item/clothing/head/helmet/space/ert) - list(/obj/item/clothing/suit/space/rig/elite, /obj/item/clothing/suit/space/rig/deathsquad, /obj/item/clothing/suit/space/rig/wizard, /obj/item/clothing/head/helmet/space/bomberman, /obj/item/clothing/suit/space/bomberman, /obj/item/clothing/mask/stone/infinite) //What in the world could go wrong
+var/list/clothing = existing_typesof(/obj/item/clothing) - typesof(/obj/item/clothing/suit/space/ert) - typesof(/obj/item/clothing/head/helmet/space/ert) - list(/obj/item/clothing/suit/space/rig/elite, /obj/item/clothing/suit/space/rig/deathsquad, /obj/item/clothing/suit/space/rig/wizard, /obj/item/clothing/head/helmet/space/bomberman, /obj/item/clothing/suit/space/bomberman, /obj/item/clothing/mask/stone/infinite, /obj/item/clothing/suit/armor/laserproof/advanced) //What in the world could go wrong
 var/list/clothing_prices = list()	//gets filled on initialize()
 
 /area/vault/supermarket
@@ -666,6 +665,10 @@ var/list/clothing_prices = list()	//gets filled on initialize()
 	..()
 
 	overlays.Add(image('icons/mob/robots.dmi', icon_state = "eyes-securitron"))
+
+/mob/living/simple_animal/hostile/spessmart_guardian/Life()
+	EscapeConfinement()
+	..()
 
 /mob/living/simple_animal/hostile/spessmart_guardian/death(var/gibbed = FALSE)
 	..(TRUE)

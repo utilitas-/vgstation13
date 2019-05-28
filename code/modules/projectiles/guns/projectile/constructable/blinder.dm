@@ -1,7 +1,7 @@
 /obj/item/device/blinder
 	name = "camera"
 	icon = 'icons/obj/items.dmi'
-	desc = "A polaroid camera. The film chamber is filled with wire for some reason."
+	desc = "A polaroid camera."
 	icon_state = "polaroid"
 	item_state = "polaroid"
 	w_class = W_CLASS_SMALL
@@ -11,11 +11,15 @@
 	origin_tech = Tc_MATERIALS + "=1;" + Tc_ENGINEERING + "=1"
 	starting_materials = list(MAT_IRON = 2000)
 	w_type = RECYK_ELECTRONIC
-	var/cell = null
+	var/obj/item/weapon/cell/cell = null
 	var/obj/item/weapon/light/bulb/flashbulb = null
 	var/start_with_bulb = TRUE
-	var/decon_path = /obj/item/device/camera/empty
+	var/decon_path = /obj/item/device/camera
 	var/powercost = 10000
+	var/base_desc = ""
+
+/obj/item/device/blinder/get_cell()
+	return cell
 
 /obj/item/device/blinder/Destroy()
 	if(cell)
@@ -26,14 +30,21 @@
 		flashbulb = null
 	..()
 
-/obj/item/device/blinder/New()
+/obj/item/device/blinder/New(var/empty = FALSE)
 	..()
+	if(empty == TRUE)
+		start_with_bulb = FALSE
 	if(start_with_bulb)
 		flashbulb = new(src)
 	update_verbs()
+	base_desc = desc
+	update_desc()
 
-/obj/item/device/blinder/empty
-	start_with_bulb = FALSE
+/obj/item/device/blinder/proc/update_desc()
+	if(cell)
+		desc = "[base_desc] There is a power cell in the film chamber for some reason."
+	else
+		desc = "[base_desc] The film chamber is filled with wire for some reason."
 
 /obj/item/device/blinder/examine(mob/user)
 	..()
@@ -53,8 +64,7 @@
 		return
 
 	if(cell)
-		var/obj/item/weapon/cell/C = cell
-		if(C.charge < powercost)
+		if(cell.charge < powercost)
 			user.visible_message("[user] presses the button on \the [src], but the flashbulb merely flickers.","You press the button on \the [src], but the flashbulb merely flickers.")
 			to_chat(user, "<span class='warning'>There's not enough energy in the cell to power the flashbulb!</span>")
 			playsound(src, 'sound/weapons/empty.ogg', 100, 1)
@@ -70,8 +80,8 @@
 		user.visible_message("<span class='danger'>[user] overloads \the [src]'s flash bulb!</span>","<span class='danger'>You overload \the [src]'s flash bulb!</span>")
 		to_chat(user, "<span class='warning'>\The [src]'s flash bulb shatters!</span>")
 
-		C.charge -= powercost
-		C.updateicon()
+		cell.charge -= powercost
+		cell.updateicon()
 
 		flashbulb.shatter(verbose = FALSE)
 		update_verbs()
@@ -79,7 +89,10 @@
 /obj/item/device/blinder/proc/flash(var/turf/T , var/mob/living/M)
 	playsound(src, 'sound/weapons/flash.ogg', 100, 1)
 
-	M.flash_eyes(visual = 1)
+	if(M.blinded)
+		return
+
+	M.flash_eyes(visual = 1, affect_silicon = 1)
 
 	if(issilicon(M))
 		M.Knockdown(rand(5, 10))
@@ -114,12 +127,10 @@
 	if(!cell)
 		return
 	else
-		var/obj/item/weapon/cell/C = cell
-		C.forceMove(usr.loc)
-		usr.put_in_hands(C)
+		to_chat(usr, "You remove \the [cell] from \the [src].")
+		usr.put_in_hands(cell)
 		cell = null
-		desc = "A polaroid camera. The film chamber is filled with wire for some reason."
-		to_chat(usr, "You remove \the [C] from \the [src].")
+		update_desc()
 	update_verbs()
 
 /obj/item/device/blinder/verb/remove_bulb()
@@ -150,7 +161,7 @@
 			return 1
 		cell = W
 		user.visible_message("[user] inserts \the [W] into \the [src].","You insert \the [W] into \the [src].")
-		desc = "A polaroid camera. There is a power cell in the film chamber for some reason."
+		update_desc()
 		update_verbs()
 
 	if(istype(W, /obj/item/weapon/light/bulb))
@@ -187,11 +198,11 @@
 		playsound(user, 'sound/items/Wirecutter.ogg', 50, 1)
 		if(src.loc == user)
 			user.drop_item(src, force_drop = 1)
-			var/obj/item/device/camera/empty/I = new decon_path(get_turf(user))
+			var/obj/item/device/camera/I = new decon_path(get_turf(user), empty = TRUE)
 			handle_camera(I)
 			user.put_in_hands(I)
 		else
-			var/obj/item/device/camera/empty/I = new decon_path(get_turf(loc))
+			var/obj/item/device/camera/I = new decon_path(get_turf(loc), empty = TRUE)
 			handle_camera(I)
 		var/obj/item/stack/cable_coil/C = new (get_turf(user))
 		C.amount = 5

@@ -26,11 +26,27 @@
 	dropBorers()
 	return ..()
 
-/mob/proc/Postmorph(var/mob/new_mob = null)
+/mob/proc/Postmorph(var/mob/new_mob = null, var/namepick = FALSE, var/namepick_message = null)
 	if(!new_mob)
 		return
 	if(mind)
 		mind.transfer_to(new_mob)
+		//namepick
+		if(namepick)
+			if(!namepick_message)
+				namepick_message = "You have been transformed! You can pick a new name, or leave this empty to keep your current one."
+			spawn(10)
+				var/newname
+				for(var/i = 1 to 3)
+					newname = reject_bad_name(stripped_input(new_mob, namepick_message, "Name change [4-i] [0-i != 1 ? "tries":"try"] left",""),1,MAX_NAME_LEN)
+					if(!newname || newname == "")
+						if(alert(new_mob,"Are you sure you want to keep your current name?",,"Yes","No") == "Yes")
+							break
+					else
+						if(alert(new_mob,"Do you really want the name:\n[newname]?",,"Yes","No") == "Yes")
+							break
+				if(newname)
+					new_mob.name = new_mob.real_name = newname
 	else
 		new_mob.key = key
 	new_mob.a_intent = a_intent
@@ -76,7 +92,7 @@
 			D.affected_mob = Mo
 			L.viruses -= D //But why?
 	Mo.delayNextAttack(0)
-	Postmorph(Mo)
+	Postmorph(Mo, TRUE, "You have been turned into a monkey! Pick a monkey name for your new monkey self.")
 	return Mo
 
 /mob/living/carbon/human/monkeyize(ignore_primitive = FALSE)
@@ -110,11 +126,6 @@
 	var/mob/living/silicon/ai/O = new (get_turf(src), base_law_type,,1)//No MMI but safety is in effect.
 	O.invisibility = 0
 	O.aiRestorePowerRoutine = 0
-	if(mind)
-		mind.transfer_to(O)
-		O.mind.original = O
-	else
-		O.key = key
 	var/obj/loc_landmark
 	if(!spawn_here)
 		for(var/obj/effect/landmark/start/sloc in landmarks_list)
@@ -137,6 +148,11 @@
 		O.forceMove(loc_landmark.loc)
 		for (var/obj/item/device/radio/intercom/comm in O.loc)
 			comm.ai += O
+	if(mind)
+		mind.transfer_to(O)
+		O.mind.original = O
+	else
+		O.key = key
 	O.verbs += /mob/living/silicon/ai/proc/show_laws_verb
 	O.verbs += /mob/living/silicon/ai/proc/ai_statuschange
 	O.job = "AI"
@@ -145,10 +161,10 @@
 	if(del_mob)
 		qdel(src)
 
-/mob/proc/Robotize(var/delete_items = FALSE, var/skipnaming=FALSE)
+/mob/proc/Robotize(var/delete_items = FALSE, var/skipnaming=FALSE, var/malfAI=null)
 	if(!Premorph(delete_items))
 		return
-	var/mob/living/silicon/robot/O = new /mob/living/silicon/robot(get_turf(src))
+	var/mob/living/silicon/robot/O = new /mob/living/silicon/robot(get_turf(src), malfAI)
 	. = O
 	if(mind)		//TODO
 		mind.transfer_to(O)
@@ -278,7 +294,6 @@
 	if(isliving(src))
 		var/mob/living/L = src
 		new_human.languages |= L.languages
-		new_human.default_language = L.default_language
 	new_human.generate_name()
 	Postmorph(new_human)
 	return new_human
@@ -309,13 +324,13 @@
 	return new_mob
 
 /mob/living/carbon/human/proc/GALize()
-	s_tone = -100 //Nichi saro ni itte hada o yaku
+	my_appearance.s_tone = -100 //Nichi saro ni itte hada o yaku
 	update_body()
-	if(gender == MALE && h_style != "Toriyama 2")
-		h_style = "Toriyama 2" //Yeah, gyaru otoko sengen
-	r_facial = r_hair = 255
-	g_facial = g_hair = 255
-	b_facial = b_hair = 0
+	if(gender == MALE && my_appearance.h_style != "Toriyama 2")
+		my_appearance.h_style = "Toriyama 2" //Yeah, gyaru otoko sengen
+	my_appearance.r_facial = my_appearance.r_hair = 255
+	my_appearance.g_facial = my_appearance.g_hair = 255
+	my_appearance.b_facial = my_appearance.b_hair = 0
 	update_hair()
 	playsound(src, 'sound/misc/gal-o-sengen.ogg', 50, 1)// GO GO GO GO GO GO GAL-O-SENGEN
 

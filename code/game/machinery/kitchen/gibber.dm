@@ -126,7 +126,7 @@ obj/machinery/gibber/New()
 		returnToPool(G)
 		update_icon()
 
-/obj/machinery/gibber/MouseDrop_T(mob/target, mob/user)
+/obj/machinery/gibber/MouseDropTo(mob/target, mob/user)
 	if(target != user || !istype(user, /mob/living/carbon/human) || user.incapacitated() || get_dist(user, src) > 1)
 		return
 	if(!anchored)
@@ -235,6 +235,7 @@ obj/machinery/gibber/New()
 	src.occupant = null
 
 	spawn(src.gibtime)
+		var/no_more_gibs = FALSE
 		operating = 0
 		for (var/i=1 to totalslabs)
 			var/obj/item/meatslab = allmeat[i]
@@ -242,8 +243,12 @@ obj/machinery/gibber/New()
 			meatslab.forceMove(src.loc)
 			meatslab.throw_at(Tx,i,3)
 			if (!Tx.density)
-				var/obj/effect/decal/cleanable/blood/gibs/O = getFromPool(/obj/effect/decal/cleanable/blood/gibs, Tx)
-				O.New(Tx,i)
+				if(!no_more_gibs)
+					getFromPool(/obj/effect/decal/cleanable/blood/gibs, Tx, i)
+			else
+				no_more_gibs = TRUE
+				if(i == 1)
+					getFromPool(/obj/effect/decal/cleanable/blood/gibs, get_turf(src), i)
 		src.operating = 0
 		update_icon()
 

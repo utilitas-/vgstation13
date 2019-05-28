@@ -33,7 +33,7 @@
 	var/scribble		//Scribble on the back.
 	var/blueprints = FALSE	//Does it include the blueprints?
 	var/info 			//Info on the camera about mobs or some shit
-
+	var/photo_size = 3 //Used to scale up bigger images, 3 is default
 	autoignition_temperature = 530 // Kelvin
 	fire_fuel = TRUE
 
@@ -67,11 +67,18 @@
 
 /obj/item/weapon/photo/proc/show(mob/user)
 	user << browse_rsc(img, "tmp_photo.png")
+	var/displaylength = 192
+	switch(photo_size)
+		if(5)
+			displaylength = 320
+		if(7)
+			displaylength = 448
+		
 	user << browse("<html><head><title>[name]</title></head>" \
 		+ "<body style='overflow:hidden;margin:0;text-align:center'>" \
-		+ "<img src='tmp_photo.png' width='192' style='-ms-interpolation-mode:nearest-neighbor' />" \
+		+ "<img src='tmp_photo.png' width='[displaylength]' style='-ms-interpolation-mode:nearest-neighbor' />" \
 		+ "[scribble ? "<br>Written on the back:<br><i>[scribble]</i>" : ""]"\
-		+ "</body></html>", "window=book;size=192x[scribble ? 400 : 192]")
+		+ "</body></html>", "window=book;size=[displaylength]x[scribble ? displaylength+108 : displaylength]")
 	if(info) //Would rather not display a blank line of text
 		to_chat(user, info)
 	onclose(user, "[name]")
@@ -108,7 +115,7 @@
 /obj/item/device/camera
 	name = "camera"
 	icon = 'icons/obj/items.dmi'
-	desc = "A polaroid camera."
+	desc = "A polaroid camera. This model uses space technology to expand polaroids to an appropriate size."
 	icon_state = "polaroid"
 	item_state = "polaroid"
 	w_class = W_CLASS_SMALL
@@ -133,59 +140,29 @@
 	var/panelopen = FALSE
 	var/obj/item/weapon/light/bulb/flashbulb = null
 	var/start_with_bulb = TRUE
-	var/decon_path = /obj/item/device/camera
 
-/obj/item/device/camera/New()
+/obj/item/device/camera/New(var/empty = FALSE)
 	..()
+	if(empty == TRUE)
+		start_with_bulb = FALSE
+		pictures_left = 0
 	if(start_with_bulb)
-		flashbulb = new /obj/item/weapon/light/bulb(src)
+		flashbulb = new(src)
 
 /obj/item/device/camera/Destroy()
 	qdel(flashbulb)
 	flashbulb = null
 	..()
 
-/obj/item/device/camera/empty
-	start_with_bulb = FALSE
-	pictures_left = 0
-
 /obj/item/device/camera/sepia
 	name = "camera"
-	desc = "This one takes pictures in sepia."
+	desc = "This polaroid camera takes pictures in sepia. It's for the aesthetic."
 	icon_state = "sepia-polaroid"
 	item_state = "sepia-polaroid"
 	icon_on = "sepia-camera"
 	icon_off = "sepia-camera_off"
 	mech_flags = MECH_SCAN_FAIL
-	decon_path = /obj/item/device/camera/sepia/empty
 
-/obj/item/device/camera/sepia/empty
-	start_with_bulb = FALSE
-	pictures_left = 0
-
-/obj/item/device/camera/big_photos
-	name = "\improper XL camera"
-	photo_size = 5
-	decon_path = /obj/item/device/camera/big_photos/empty
-
-/obj/item/device/camera/big_photos/set_zoom()
-	return
-
-/obj/item/device/camera/big_photos/empty
-	start_with_bulb = FALSE
-	pictures_left = 0
-
-/obj/item/device/camera/huge_photos
-	name = "\improper XXL camera"
-	photo_size = 7
-	decon_path = /obj/item/device/camera/huge_photos/empty
-
-/obj/item/device/camera/huge_photos/set_zoom()
-	return
-
-/obj/item/device/camera/huge_photos/empty
-	start_with_bulb = FALSE
-	pictures_left = 0
 
 /obj/item/device/camera/examine(mob/user)
 	..()
@@ -209,22 +186,39 @@
 
 	return res
 
+
 /obj/item/device/camera/verb/set_zoom()
-	set name = "Set Camera Zoom"
+	set name = "Switch camera zoom"
 	set category = "Object"
 
 	if(usr.incapacitated())
 		return
 
-	if(photo_size == 3)
+	switch(photo_size)
+		if(1)
+			photo_size = 3
+		if(3)
+			photo_size = 5
+		if(5)
+			photo_size = 7
+		if(7)
+			photo_size = 1
+			
+	usr.simple_message("<span class='info'>You switch the camera zoom to [photo_size]x[photo_size].</span>", "<span class='danger'>You press the... you wonder if you can photograph those rainbow guys dancing in the background.</span>")
+		
+	/*if(photo_size == 3)
 		photo_size = 1
 		usr.simple_message("<span class='info'>You zoom the camera in.</span>", "<span class='danger'>You drink from the mysterious bottle labeled \"DRINK ME\". Everything feels huge!</span>") //Second message is shown when hallucinating
 	else
 		photo_size = 3
 		usr.simple_message("<span class='info'>You zoom the camera out.</span>", "<span class='danger'>You take a bite of the mysterious mushroom. Everything feels so tiny!</span>") //Second message is shown when hallucinating
+	*/
 
 /obj/item/device/camera/AltClick()
-	set_zoom()
+	if(is_holder_of(usr, src))
+		set_zoom()
+	else
+		return ..()
 
 /obj/item/device/camera/silicon
 	name = "silicon photo camera"
@@ -242,10 +236,18 @@
 	set name = "Print Image"
 	set src in usr
 
+	if(!isrobot(usr))
+		return
+
+	var/mob/living/silicon/robot/R = usr
+
+	if(R.incapacitated())
+		return
+
 	borgprint()
 
 /obj/item/device/camera/attackby(obj/item/I, mob/user)
-	if(isscrewdriver(I))
+	if(I.is_screwdriver(user))
 		to_chat(user, "You [panelopen ? "close" : "open"] the panel on the side of \the [src].")
 		panelopen = !panelopen
 		playsound(src, 'sound/items/Screwdriver.ogg', 50, 1)
@@ -260,11 +262,11 @@
 		to_chat(user, "You attach [C.amount > 5 ? "some" : "the"] wires to \the [src]'s flash circuit.")
 		if(loc == user)
 			user.drop_item(src, force_drop = 1)
-			var/obj/item/device/blinder/empty/Q = new(get_turf(user))
+			var/obj/item/device/blinder/Q = new(get_turf(user), empty = TRUE)
 			handle_blinder(Q)
 			user.put_in_hands(Q)
 		else
-			var/obj/item/device/blinder/empty/Q = new(get_turf(loc))
+			var/obj/item/device/blinder/Q = new(get_turf(loc), empty = TRUE)
 			handle_blinder(Q)
 		C.use(5)
 		qdel(src)
@@ -292,11 +294,12 @@
 
 	blinder.name = name
 	blinder.icon = icon
-	blinder.desc = "[desc] The film chamber is filled with wire for some reason."
+	blinder.base_desc = desc
+	blinder.update_desc()
 	blinder.icon_state = icon_state
 	blinder.item_state = item_state
 	blinder.mech_flags = mech_flags
-	blinder.decon_path = decon_path
+	blinder.decon_path = type
 
 /obj/item/device/camera/proc/camera_get_icon(list/turfs, turf/center)
 	var/atoms[] = list()
@@ -310,6 +313,8 @@
 	var/icon/res = get_base_photo_icon()
 
 	for(var/atom/A in plane_layer_sort(atoms))
+	
+		CHECK_TICK
 		var/icon/img = getFlatIcon(A,A.dir,0)
 		if(istype(A, /mob/living) && A:lying)
 			img.Turn(A:lying)
@@ -326,51 +331,9 @@
 		if(istype(A, /obj/item/blueprints/primary))
 			blueprints = 1
 
-	/*
-	for(var/turf/T in turfs)
-		res.Blend(getFlatIcon(T.loc), blendMode2iconMode(T.blend_mode), 32 * (T.x - center.x) + 33, 32 * (T.y - center.y) + 33)
-	//Turfs are atoms as well, duh, they render perfectly well without that part of the code. Plus that part was causing tiles with colored lightning to appear all white.
-	*/
 
 	return res
 
-
-/obj/item/device/camera/sepia/camera_get_icon(list/turfs, turf/center)
-	var/atoms[] = list()
-	for(var/turf/T in turfs)
-		atoms.Add(T)
-		for(var/atom/movable/A in T)
-			if(A.invisibility != 0)
-				if(istype(A, /mob/))
-					atoms.Add(A)
-			else
-				atoms.Add(A)
-
-	var/icon/res = get_base_photo_icon()
-
-	for(var/atom/A in plane_layer_sort(atoms))
-		var/icon/img = getFlatIcon(A,A.dir,0)
-		if(istype(A, /mob/living) && A:lying)
-			img.Turn(A:lying)
-
-		var/offX = WORLD_ICON_SIZE * (A.x - center.x) + A.pixel_x + (WORLD_ICON_SIZE+1)
-		var/offY = WORLD_ICON_SIZE * (A.y - center.y) + A.pixel_y + (WORLD_ICON_SIZE+1)
-		if(istype(A, /atom/movable))
-			offX += A:step_x
-			offY += A:step_y
-
-		res.Blend(img, blendMode2iconMode(A.blend_mode), offX, offY)
-
-		if(istype(A, /obj/item/blueprints/primary))
-			blueprints = 1
-
-	/*
-	for(var/turf/T in turfs)
-		res.Blend(getFlatIcon(T.loc), blendMode2iconMode(T.blend_mode), 32 * (T.x - center.x) + 33, 32 * (T.y - center.y) + 33)
-	//Turfs are atoms as well, duh, they render perfectly well without that part of the code. Plus that part was causing tiles with colored lightning to appear all white.
-	*/
-
-	return res
 
 
 /obj/item/device/camera/proc/camera_get_mobs(turf/the_turf)
@@ -492,6 +455,7 @@
 	P.info = mobs
 	P.pixel_x = rand(-10, 10) * PIXEL_MULTIPLIER
 	P.pixel_y = rand(-10, 10) * PIXEL_MULTIPLIER
+	P.photo_size = photo_size
 
 	if(blueprints)
 		P.blueprints = TRUE
@@ -509,6 +473,7 @@
 	P.info = mobs
 	P.pixel_x = rand(-10, 10) * PIXEL_MULTIPLIER
 	P.pixel_y = rand(-10, 10) * PIXEL_MULTIPLIER
+	P.photo_size = photo_size
 
 	if(blueprints)
 		P.blueprints = TRUE

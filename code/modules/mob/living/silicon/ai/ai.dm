@@ -36,6 +36,7 @@ var/list/ai_list = list()
 	var/obj/item/device/station_map/station_holomap = null
 	var/obj/item/device/camera/silicon/aicamera = null
 	var/busy = FALSE //Toggle Floor Bolt busy var.
+	var/chosen_core_icon_state = "ai"
 
 //Hud stuff
 
@@ -137,14 +138,17 @@ var/list/ai_list = list()
 			to_chat(src, "<B>While observing through a camera, you can use most (networked) devices which you can see, such as computers, APCs, intercoms, doors, etc.</B>")
 			to_chat(src, "To use something, simply click on it.")
 			to_chat(src, "Use say :b to speak to your cyborgs through binary.")
-			if(!(ticker && ticker.mode && (mind in ticker.mode.malf_ai)))
-				show_laws()
+			show_laws()
+			if (!ismalf(src))
 				to_chat(src, "<b>These laws may be changed by other players, or by you being the traitor.</b>")
 
 			job = "AI"
 	ai_list += src
 	..()
-	return
+	if(prob(25))
+		playsound(src, get_sfx("windows error"), 75, FALSE)
+	else
+		playsound(src, 'sound/machines/WXP_startup.ogg', 75, FALSE)
 
 /mob/living/silicon/ai/verb/toggle_anchor()
 	set category = "AI Commands"
@@ -207,126 +211,78 @@ var/list/ai_list = list()
 	set name = "Set AI Core Display"
 	if(stat || aiRestorePowerRoutine)
 		return
-	var/icontype = input("Select an icon!", "AI", null, null) as null|anything in list("Monochrome", "Blue", "Inverted", "Text", "Smiley", "Angry", "Dorf", "Matrix", "Bliss", "Firewall", "Green", "Red", "Broken Output", "Triumvirate", "Triumvirate Static", "Searif", "Ravensdale", "Serithi", "Static", "Wasp", "Robert House", "Red October", "Fabulous", "Girl", "Girl Malf", "Boy", "Boy Malf", "Four-Leaf", "Yes Man", "Hourglass", "Patriot", "Pirate", "Royal", "Heartline", "Hades", "Helios", "Syndicat", "Alien", "Too Deep", "Goon", "Database", "Glitchman", "Nanotrasen", "Angel", "Gentoo", "Murica", "President", "Fort", "Mothman", "Dancing Hotdog", "Diagnosis", "Drink It!", "Metaclub", "Jack Frost")
-	switch(icontype)
-		if("Clown")
-			icon_state = "ai-clown2"
-		if("Monochrome")
-			icon_state = "ai-mono"
-		if("Inverted")
-			icon_state = "ai-u"
-		if("Firewall")
-			icon_state = "ai-magma"
-		if("Green")
-			icon_state = "ai-wierd"
-		if("Red")
-			icon_state = "ai-malf"
-		if("Broken Output")
-			icon_state = "ai-static"
-		if("Text")
-			icon_state = "ai-text"
-		if("Smiley")
-			icon_state = "ai-smiley"
-		if("Matrix")
-			icon_state = "ai-matrix"
-		if("Angry")
-			icon_state = "ai-angryface"
-		if("Dorf")
-			icon_state = "ai-dorf"
-		if("Bliss")
-			icon_state = "ai-bliss"
-		if("Triumvirate")
-			icon_state = "ai-triumvirate"
-		if("Triumvirate Static")
-			icon_state = "ai-triumvirate-malf"
-		if("Searif")
-			icon_state = "ai-searif"
-		if("Ravensdale")
-			icon_state = "ai-ravensdale"
-		if("Serithi")
-			icon_state = "ai-serithi"
-		if("Static")
-			icon_state = "ai-fuzz"
-		if("Wasp")
-			icon_state = "ai-wasp"
-		if("Robert House")
-			icon_state = "ai-president"
-		if("Red October")
-			icon_state = "ai-soviet"
-		if("Girl")
-			icon_state = "ai-girl"
-		if("Girl Malf")
-			icon_state = "ai-girl-malf"
-		if("Boy")
-			icon_state = "ai-boy"
-		if("Boy Malf")
-			icon_state = "ai-boy-malf"
-		if("Fabulous")
-			icon_state = "ai-fabulous"
-		if("Four-Leaf")
-			icon_state = "ai-4chan"
-		if("Yes Man")
-			icon_state = "yes-man"
-		if("Hourglass")
-			icon_state = "ai-hourglass"
-		if("Patriot")
-			icon_state = "ai-patriot"
-		if("Pirate")
-			icon_state = "ai-pirate"
-		if("Royal")
-			icon_state = "ai-royal"
-		if("Heartline")
-			icon_state = "ai-heartline"
-		if("Hades")
-			icon_state = "ai-hades"
-		if("Helios")
-			icon_state = "ai-helios"
-		if("Syndicat")
-			icon_state = "ai-syndicatmeow"
-		if("Too Deep")
-			icon_state = "ai-toodeep"
-		if("Goon")
-			icon_state = "ai-goon"
-		if("Database")
-			icon_state = "ai-database"
-		if("Glitchman")
-			icon_state = "ai-glitchman"
-		if("Alien")
-			icon_state = "ai-alien"
-		if("Nanotrasen")
-			icon_state = "ai-nanotrasen"
-		if("Angel")
-			icon_state = "ai-angel"
-		if("Gentoo")
-			icon_state = "ai-gentoo"
-		if("Murica")
-			icon_state = "ai-murica"
-		if("President")
-			icon_state = "ai-pres"
-		if("Fort")
-			icon_state = "ai-boxfort"
-		if("Mothman")
-			icon_state = "ai-mothman"
-		if("Dancing Hotdog")
-			icon_state = "ai-hotdog"
-		if("Diagnosis")
-			icon_state = "ai-atlantiscze"
-		if("Drink It!")
-			icon_state = "ai-silveryferret"
-		if("Metaclub")
-			icon_state = "ai-terminal"
-		if("Jack Frost")
-			icon_state = "ai-jack"
-		else icon_state = "ai"
+	var/static/list/possible_icon_states = list(
+		"Alien" = "ai-alien",
+		"Angel" = "ai-angel",
+		"Angry" = "ai-angryface",
+		"Bliss" = "ai-bliss",
+		"Blue" = "ai",
+		"Boy Malf" = "ai-boy-malf",
+		"Boy" = "ai-boy",
+		"Broken Output" = "ai-static",
+		"Clown" = "ai-clown2",
+		"Dancing Hotdog" = "ai-hotdog",
+		"Database" = "ai-database",
+		"Diagnosis" = "ai-atlantiscze",
+		"Dorf" = "ai-dorf",
+		"Drink It!" = "ai-silveryferret",
+		"Fabulous" = "ai-fabulous",
+		"Firewall" = "ai-magma",
+		"Fort" = "ai-boxfort",
+		"Four-Leaf" = "ai-4chan",
+		"Gentoo" = "ai-gentoo",
+		"Girl Malf" = "ai-girl-malf",
+		"Girl" = "ai-girl",
+		"Glitchman" = "ai-glitchman",
+		"Goon" = "ai-goon",
+		"Green" = "ai-wierd",
+		"Hades" = "ai-hades",
+		"Heartline" = "ai-heartline",
+		"Helios" = "ai-helios",
+		"Hourglass" = "ai-hourglass",
+		"Inverted" = "ai-u",
+		"Jack Frost" = "ai-jack",
+		"Matrix" = "ai-matrix",
+		"Metaclub" = "ai-terminal",
+		"Monochrome" = "ai-mono",
+		"Mothman" = "ai-mothman",
+		"Murica" = "ai-murica",
+		"Nanotrasen" = "ai-nanotrasen",
+		"Patriot" = "ai-patriot",
+		"Pirate" = "ai-pirate",
+		"President" = "ai-pres",
+		"Ravensdale" = "ai-ravensdale",
+		"Red October" = "ai-soviet",
+		"Red" = "ai-malf",
+		"Robert House" = "ai-president",
+		"Royal" = "ai-royal",
+		"Searif" = "ai-searif",
+		"Serithi" = "ai-serithi",
+		"Smiley" = "ai-smiley",
+		"Static" = "ai-fuzz",
+		"Syndicat" = "ai-syndicatmeow",
+		"Text" = "ai-text",
+		"Too Deep" = "ai-toodeep",
+		"Triumvirate Static" = "ai-triumvirate-malf",
+		"Triumvirate" = "ai-triumvirate",
+		"Wasp" = "ai-wasp",
+		"Yes Man" = "yes-man",
+	)
+	var/selected = input("Select an icon!", "AI", null, null) as null|anything in possible_icon_states
+	if(!selected)
+		return
+	var/chosen_state = possible_icon_states[selected]
+	ASSERT(chosen_state)
+	chosen_core_icon_state = chosen_state
+	update_icon()
 
 // displays the malf_ai information if the AI is the malf
 /mob/living/silicon/ai/show_malf_ai()
-	if(ticker.mode.name == "AI malfunction")
-		var/datum/game_mode/malfunction/malf = ticker.mode
-		for (var/datum/mind/malfai in malf.malf_ai)
-			if(mind == malfai) // are we the evil one?
-				if(malf.apcs >= 3)
-					stat(null, "Time until station control secured: [max(malf.AI_win_timeleft/(malf.apcs/3), 0)] seconds")
+	var/datum/faction/malf/malf = find_active_faction_by_member(src.mind.GetRole(MALF))
+	if(malf && malf.apcs >= 3)
+		stat(null, "Amount of APCS hacked: [malf.apcs]")
+		stat(null, "Time until station control secured: [max(malf.AI_win_timeleft/(malf.apcs/3), 0)] seconds")
+
 
 /mob/proc/remove_malf_spells()
 	for(var/spell/S in spell_list)
@@ -472,7 +428,7 @@ var/list/ai_list = list()
 /mob/living/silicon/ai/Topic(href, href_list)
 	if(usr != src)
 		return
-	..()
+	. = ..()
 	if(href_list["mach_close"])
 		if(href_list["mach_close"] == "aialerts")
 			viewalerts = FALSE
@@ -499,27 +455,6 @@ var/list/ai_list = list()
 	if(href_list["say_word"])
 		play_vox_word(href_list["say_word"], null, src)
 		return
-
-	if(href_list["lawc"]) // Toggling whether or not a law gets stated by the State Laws verb --NeoFite
-		var/L = text2num(href_list["lawc"])
-		switch(lawcheck[L+1])
-			if("Yes")
-				lawcheck[L+1] = "No"
-			if("No")
-				lawcheck[L+1] = "Yes"
-		checklaws()
-
-	if(href_list["lawi"]) // Toggling whether or not a law gets stated by the State Laws verb --NeoFite
-		var/L = text2num(href_list["lawi"])
-		switch(ioncheck[L])
-			if("Yes")
-				ioncheck[L] = "No"
-			if("No")
-				ioncheck[L] = "Yes"
-		checklaws()
-
-	if(href_list["laws"]) // With how my law selection code works, I changed statelaws from a verb to a proc, and call it through my law selection panel. --NeoFite
-		statelaws()
 
 	if(href_list["track"])
 		var/mob/target = locate(href_list["track"]) in mob_list
@@ -551,8 +486,6 @@ var/list/ai_list = list()
 		if(A && target)
 			A.open_nearest_door(target)
 		return
-
-	return
 
 /mob/living/silicon/ai/bullet_act(var/obj/item/projectile/Proj)
 	..(Proj)
@@ -750,18 +683,18 @@ var/list/ai_list = list()
 	else
 		var/icon_list[] = list(
 		"Default",
-		"Floating face",
-		"Cortano",
-		"Spoopy",
 		"343",
 		"Auto",
-		"Four-Leaf",
-		"Yotsuba",
-		"Girl",
 		"Boy",
-		"SHODAN",
 		"Corgi",
-		"Mothman"
+		"Cortano",
+		"Floating face",
+		"Four-Leaf",
+		"Girl",
+		"Mothman",
+		"SHODAN",
+		"Spoopy",
+		"Yotsuba",
 		)
 		input = input("Please select a hologram:") as null|anything in icon_list
 		if(input)
@@ -909,3 +842,12 @@ var/list/ai_list = list()
 
 /mob/living/silicon/ai/isTeleViewing(var/client_eye)
 	return TRUE
+
+/mob/living/silicon/ai/update_icon()
+	if(stat == DEAD)
+		if("[chosen_core_icon_state]-crash" in icon_states(src.icon,1))
+			icon_state = "[chosen_core_icon_state]-crash"
+		else
+			icon_state = "ai-crash"
+		return
+	icon_state = chosen_core_icon_state

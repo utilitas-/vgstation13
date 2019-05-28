@@ -101,7 +101,13 @@
 	var/opening = 0
 
 	// WHY DO WE SMOOTH WITH FALSE R-WALLS WHEN WE DON'T SMOOTH WITH REAL R-WALLS.
-	canSmoothWith = "/turf/simulated/wall=0&/obj/structure/falsewall=0&/obj/structure/falserwall=0"
+/obj/structure/falsewall/canSmoothWith()
+	var/static/list/smoothables = list(
+		/turf/simulated/wall,
+		/obj/structure/falsewall,
+		/obj/structure/falserwall,
+	)
+	return smoothables
 
 /obj/structure/falsewall/closed
 	density = 1
@@ -181,7 +187,7 @@
 		if(T.density)
 			to_chat(user, "<span class='warning'>The wall is blocked!</span>")
 			return
-		if(isscrewdriver(W))
+		if(W.is_screwdriver(user))
 			user.visible_message("[user] tightens some bolts on the wall.", "You tighten the bolts on the wall.")
 			if(!mineral || mineral == "metal")
 				T.ChangeTurf(/turf/simulated/wall)
@@ -189,9 +195,9 @@
 				T.ChangeTurf(text2path("/turf/simulated/wall/mineral/[mineral]"))
 			qdel(src)
 
-		if( istype(W, /obj/item/weapon/weldingtool) )
+		if( iswelder(W) )
 			var/obj/item/weapon/weldingtool/WT = W
-			if( WT:welding )
+			if(WT.welding )
 				if(!mineral)
 					T.ChangeTurf(/turf/simulated/wall)
 				else
@@ -239,14 +245,19 @@
 	anchored = 1
 	var/mineral = "metal"
 	var/opening = 0
-
-	// WHY DO WE SMOOTH WITH FALSE R-WALLS WHEN WE DON'T SMOOTH WITH REAL R-WALLS.
-	canSmoothWith = "/turf/simulated/wall=0&/obj/structure/falsewall=0&/obj/structure/falserwall=0"
+// WHY DO WE SMOOTH WITH FALSE R-WALLS WHEN WE DON'T SMOOTH WITH REAL R-WALLS.
+/obj/structure/falserwall/canSmoothWith()
+	var/static/list/smoothables = list(
+		/turf/simulated/wall,
+		/obj/structure/falsewall,
+		/obj/structure/falserwall,
+	)
+	return smoothables
 
 /obj/structure/falserwall/New()
+	..()
 	relativewall()
 	relativewall_neighbours()
-	..()
 
 
 /obj/structure/falserwall/attack_ai(mob/user as mob)
@@ -290,13 +301,13 @@
 		to_chat(user, "<span class='warning'>You must wait until the door has stopped moving.</span>")
 		return
 
-	if(isscrewdriver(W))
+	if(W.is_screwdriver(user))
 		var/turf/T = get_turf(src)
 		user.visible_message("[user] tightens some bolts on the r wall.", "You tighten the bolts on the wall.")
 		T.ChangeTurf(/turf/simulated/wall/r_wall) //Why not make rwall?
 		qdel(src)
 
-	if( istype(W, /obj/item/weapon/weldingtool) )
+	if( iswelder(W) )
 		var/obj/item/weapon/weldingtool/WT = W
 		if( WT.remove_fuel(0,user) )
 			var/turf/T = get_turf(src)

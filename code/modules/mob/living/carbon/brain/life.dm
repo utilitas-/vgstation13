@@ -1,5 +1,4 @@
 /mob/living/carbon/brain/Life()
-	set invisibility = 0
 	//set background = 1
 	if(timestopped)
 		return 0 //under effects of time magick
@@ -210,7 +209,7 @@
 	return 1
 
 
-/mob/living/carbon/brain/proc/handle_regular_hud_updates()
+/mob/living/carbon/brain/handle_regular_hud_updates()
 
 
 	if (stat == 2 || (M_XRAY in src.mutations))
