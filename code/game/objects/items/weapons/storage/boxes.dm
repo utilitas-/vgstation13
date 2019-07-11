@@ -148,6 +148,22 @@
 		)
 		new toSpawn(src)
 
+/obj/item/weapon/storage/box/byond
+	name = "\improper BYOND support package"
+	desc = "A small box containing a branded trinket that the BYOND corporation sends to people that actually send them money."
+	icon_state = "byond"
+	storage_slots = 1 //not very useful for storage
+	foldable = /obj/item/trash/byond_box //no free cardboard
+
+/obj/item/weapon/storage/box/byond/New()
+	..()
+	var/obj/item/gibsmedat = pick(
+		/obj/item/weapon/thermometer/byond,
+		/obj/item/clothing/accessory/medal/byond,
+		/obj/item/toy/syndicateballoon/byondballoon,
+	)
+	new gibsmedat(src)
+
 /obj/item/weapon/storage/box/gloves
 	name = "box of latex gloves"
 	desc = "A box containing white latex gloves. gloves. gloves."
@@ -463,6 +479,16 @@
 	for(var/i = 1; i <= 5; i++)
 		new /obj/item/weapon/reagent_containers/food/snacks/monkeycube/wrapped/neaeracube(src)
 
+/obj/item/weapon/storage/box/monkeycubes/mousecubes
+	name = "lab mouse cube box"
+	desc = "Drymate brand laboratory mouse cubes, shipped from Yensid. Just add water!"
+	icon_state = "mousecubebox"
+
+/obj/item/weapon/storage/box/monkeycubes/mousecubes/New()
+	..()
+	for(var/i = 1; i <= 5; i++)
+		new /obj/item/weapon/reagent_containers/food/snacks/monkeycube/wrapped/mousecube(src)
+
 /obj/item/weapon/storage/box/ids
 	name = "spare IDs"
 	desc = "Contains blank identification cards."
@@ -528,6 +554,8 @@
 	var/glasses = pick(/obj/item/clothing/glasses/sunglasses/sechud/prescription, /obj/item/clothing/glasses/sunglasses/sechud)
 	new glasses(src)
 	new /obj/item/clothing/gloves/black(src)
+	new /obj/item/weapon/storage/belt/detective(src)
+	new /obj/item/weapon/switchtool/switchblade(src)
 	new /obj/item/device/gps/secure(src)
 	new /obj/item/ammo_storage/box/c38(src)
 	new /obj/item/ammo_storage/box/c38(src)
@@ -537,6 +565,8 @@
 	new /obj/item/binoculars(src)
 	new /obj/item/weapon/storage/box/surveillance(src)
 	new /obj/item/device/handtv(src)
+	new /obj/item/weapon/reagent_containers/spray/luminol(src)
+	new /obj/item/taperoll/police(src)
 
 /obj/item/weapon/storage/box/mousetraps
 	name = "box of Pest-B-Gon Mousetraps"
