@@ -456,6 +456,45 @@ proc/process_adminbus_teleport_locs()
 /area/shuttle/salvage/trading_post
 	name = "\improper Trading Post"
 	icon_state = "yellow"
+	
+
+	// Taxi Shuttle
+
+/area/shuttle/taxi_a
+	name = "Taxi A"
+	requires_power = 0
+
+/area/shuttle/taxi_a/medcal_silicon_station
+	icon_state = "bluenew"
+
+/area/shuttle/taxi_a/engineering_cargo_station
+	icon_state = "bluenew"
+
+/area/shuttle/taxi_a/security_science_station
+	icon_state = "bluenew"
+
+/area/shuttle/taxi_a/abandoned_station
+	icon_state = "bluenew"
+
+// B
+
+/area/shuttle/taxi_b
+	name = "Taxi B"
+	requires_power = 0
+
+/area/shuttle/taxi_b/medcal_silicon_station
+	icon_state = "dk_yellow"
+
+/area/shuttle/taxi_b/engineering_cargo_station
+	icon_state = "dk_yellow"
+
+/area/shuttle/taxi_b/security_science_station
+	icon_state = "dk_yellow"
+
+/area/shuttle/taxi_b/abandoned_station
+	icon_state = "dk_yellow"
+
+// End Taxi Shuttle
 
 
 /area/airtunnel1/      // referenced in airtunnel.dm:759
