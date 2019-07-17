@@ -329,6 +329,9 @@
 	if(isUnconscious())
 		return
 
+	if (locked_to && istype(locked_to, /obj/item/critter_cage))
+		return
+
 	if (plane != HIDING_MOB_PLANE)
 		plane = HIDING_MOB_PLANE
 		to_chat(src, text("<span class='notice'>You are now hiding.</span>"))
@@ -459,7 +462,6 @@
 
 /mob/living/simple_animal/mouse/balbc
 	name = "laboratory mouse"
-	namenumbers = FALSE
 	desc = "A lab mouse of the BALB/c strain (Mus Musculus). Very docile, though they become easily anxious."
 	_color = "balbc"
 	icon_state = "mouse_balbc"
@@ -485,6 +487,7 @@
 		"The Brain",
 		"Nibbles",
 		"Snuffles",
+		"Sugar",
 		)
 	real_name = name
 
