@@ -163,11 +163,11 @@ var/datum/nanomanager/nanomanager = new()
 #define AIR_DAMAGE_MODIFIER 2.025 //More means less damage from hot air scalding lungs, less = more damage. (default 2.025)
 
 	//Don't set this very much higher then 1024 unless you like inviting people in to dos your server with message spam
-#define MAX_MESSAGE_LEN 1024
-#define MAX_PAPER_MESSAGE_LEN 3072
-#define MAX_BOOK_MESSAGE_LEN 9216
-#define MAX_NAME_LEN 26
-#define MAX_BROADCAST_LEN		512
+#define MAX_MESSAGE_LEN 8192
+#define MAX_PAPER_MESSAGE_LEN 24576
+#define MAX_BOOK_MESSAGE_LEN 73728
+#define MAX_NAME_LEN 52
+#define MAX_BROADCAST_LEN		2048
 
 #define shuttle_time_in_station 1800 // 3 minutes in the station
 #define shuttle_time_to_arrive 6000 // 10 minutes to arrive

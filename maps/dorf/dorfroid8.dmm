@@ -1,0 +1,32 @@
+"a" = (/turf/space,/area)
+"b" = (/turf/unsimulated/mineral/random/high_chance,/area/mine/unexplored)
+"c" = (/turf/unsimulated/mineral/random/high_chance_clown,/area/mine/unexplored)
+"d" = (/turf/unsimulated/floor/asteroid,/area/mine/unexplored)
+"e" = (/mob/living/simple_animal/hostile/asteroid/goliath,/turf/unsimulated/floor/asteroid,/area/mine/unexplored)
+
+(1,1,1) = {"
+aaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaa
+aaaabbbaaaaaaaaaaaabbbba
+aabbbbbaaaaaaaaaaaabbbba
+aabbbbbaaaaaaaaaaaaabbba
+aabbbbbaaaaaabbbbbaaaaaa
+aabbbbbaaaaabbbbbbbbaaaa
+aabbbbbaaaabbbbbbbbbbaaa
+baabbbbaaabbbbbbbbbbbbaa
+bbabbbaaaabbbbbbbbbbbbaa
+bbabbbaaaaabbbbbbbbbbbaa
+bbabbaaaaaaaaabbbbbbbaaa
+aaaabaaaaaaaaaaabbbbaaaa
+aaaaaaaacccaaaaaaaaaaaaa
+aaaaaaaacddccaaaaaaaaaaa
+aaaaaaaaacedcaaaaaaaaaaa
+aabbaaaaaacccaaaaaabaaaa
+abbbbbaaaaaaaaaaaabbbbba
+bbbbbbaaaaaaaaaaaabbbbbb
+bbbbbbbaaacccaaaabbbbbbb
+abbbbbbaaacccaaaabbbbbbb
+abbbbaaaaaaccaaaaaabbbbb
+aabaaaaaaaaaaaaaaaabbbaa
+"}

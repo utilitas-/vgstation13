@@ -32,6 +32,16 @@
 	item_state = "dermal"
 	siemens_coefficient = 0.6
 
+/obj/item/clothing/head/helmet/tactical/HoS/warmaster
+	name = "Warmaster's Hat"
+	desc = "Just looking at this hat makes you feel nervous. And weirdly aroused."
+	icon_state = "warmasterhat"
+	flags = FPRINT
+	armor = list(melee = 90, bullet = 70, laser = 40, energy = 0, bomb = 25, bio = 10, rad = 10)
+	body_parts_covered = HEAD
+	species_fit = list()
+	siemens_coefficient = 0.8
+
 /obj/item/clothing/head/helmet/tactical/warden
 	name = "warden's hat"
 	desc = "It's a special helmet issued to the Warden of a security force. Protects the head from impacts."

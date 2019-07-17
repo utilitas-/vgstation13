@@ -1,0 +1,27 @@
+"a" = (/turf/space,/area)
+"b" = (/turf/unsimulated/mineral/random/high_chance_clown/snow,/area/mine/unexplored)
+"c" = (/turf/unsimulated/mineral/snow,/area/mine/unexplored)
+"d" = (/turf/unsimulated/mineral/random/high_chance/snow,/area/mine/unexplored)
+"e" = (/turf/unsimulated/mineral/random/snow,/area/mine/unexplored)
+"f" = (/obj/abstract/map/spawner/mobs/wolf,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"g" = (/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"h" = (/mob/living/simple_animal/hostile/wendigo,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"i" = (/obj/structure/flora/bush,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+
+(1,1,1) = {"
+aaaaaaaaaaaaaaaaabaabaab
+aaaaaaaaaaaaaaaaaaabaaba
+aaaaaaaaaaaaabbabbaaaaba
+aaaaaaaaaaaaaaaabaaaaaaa
+aaaaacccccccaaaaaaaaabaa
+aaccccddeecccaabbaaabbaa
+accddbbbedddcaaaaaabbaaa
+ecddbbbeddeeddcaaaaaaaaa
+edddddedfeeddcaabbaaaaaa
+eddddiddddeedcabbaaaaaaa
+eceeeghdedddccaaaaaaaaaa
+aeeeeedbbdeecaaaaaaaaaaa
+aeededdbdddccaaaaaaaaaaa
+aaeeedddddccaaaaaaaaaaaa
+aaaeeeeeeeeaaaaaaaaaaaaa
+"}

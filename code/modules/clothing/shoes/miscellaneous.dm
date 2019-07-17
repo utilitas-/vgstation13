@@ -382,6 +382,41 @@ obj/item/clothing/shoes/jackboots/cowboy
 	icon_state = "kneesock"
 	item_state = "kneesock"
 
+/obj/item/clothing/shoes/kneesocks/pinkknee
+	name = "pink kneesocks"
+	desc = "A pair of girly programming socks."
+	icon = 'icons/obj/clothing/programming_shoes.dmi'
+	icon_state = "pinkknee"
+	item_state = "pinkknee"
+	
+/obj/item/clothing/shoes/kneesocks/greenknee
+	name = "green kneesocks"
+	desc = "A pair of girly programming socks."
+	icon = 'icons/obj/clothing/programming_shoes.dmi'
+	icon_state = "greenknee"
+	item_state = "greenknee"
+	
+/obj/item/clothing/shoes/kneesocks/redknee
+	name = "red kneesocks"
+	desc = "A pair of girly programming socks."
+	icon = 'icons/obj/clothing/programming_shoes.dmi'
+	icon_state = "redknee"
+	item_state = "redknee"
+	
+/obj/item/clothing/shoes/kneesocks/blueknee
+	name = "blue kneesocks"
+	desc = "A pair of girly programming socks."
+	icon = 'icons/obj/clothing/programming_shoes.dmi'
+	icon_state = "blueknee"
+	item_state = "blueknee"
+	
+/obj/item/clothing/shoes/kneesocks/purpleknee
+	name = "purple kneesocks"
+	desc = "A pair of girly programming socks."
+	icon = 'icons/obj/clothing/programming_shoes.dmi'
+	icon_state = "purpleknee"
+	item_state = "purpleknee"
+
 /obj/item/clothing/shoes/jestershoes
 	name = "Jester Shoes"
 	desc = "As worn by the clowns of old."

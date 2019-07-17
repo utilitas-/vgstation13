@@ -1,0 +1,34 @@
+"a" = (/turf/space,/area)
+"b" = (/turf/unsimulated/mineral/random,/area/mine/unexplored)
+"c" = (/turf/unsimulated/mineral/random/high_chance,/area/mine/unexplored)
+"d" = (/turf/unsimulated/mineral/random/high_chance_clown/snow,/area/mine/unexplored)
+"e" = (/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"f" = (/mob/living/simple_animal/hostile/wendigo/skifree,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"g" = (/obj/abstract/map/spawner/misc/seeds{amount = 3; chance = 100},/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"h" = (/turf/unsimulated/mineral/syreline,/area/mine/unexplored)
+"i" = (/mob/living/simple_animal/hostile/tree,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"j" = (/obj/item/weapon/boxofsnow,/obj/item/weapon/reagent_containers/food/snacks/grown/aloe,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"k" = (/obj/structure/flora/bush,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"l" = (/obj/item/weapon/boxofsnow,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"m" = (/turf/unsimulated/mineral/uqill,/area/mine/unexplored)
+"n" = (/obj/item/seeds/avocadoseed/whole,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"o" = (/obj/item/seeds/woodapple,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"p" = (/obj/abstract/map/spawner/mobs/wolf,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+"q" = (/obj/structure/flora/grass/white,/turf/unsimulated/floor/snow,/area/mine/unexplored)
+
+(1,1,1) = {"
+aaaabcbaaaa
+aaaabcbaaaa
+aaabcdcbaaa
+aaabcdcbaaa
+aabcdedcbaa
+aabcdedcbaa
+abcdefgdcba
+abcdeeedhba
+bcdeijpkdcb
+bcdkpleqdcb
+bmdeneoedcb
+bccdddddccb
+abbcccccbba
+aaabbbbbaaa
+"}
